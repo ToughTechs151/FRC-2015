@@ -10,11 +10,3 @@
 hs_err_pid*
 
 # user ignores
-sysProps.xml
-build.xml
-build.properties
-.project
-.classpath
-dist/
-build/
-.settings/
