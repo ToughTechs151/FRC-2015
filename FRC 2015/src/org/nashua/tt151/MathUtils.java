@@ -21,7 +21,7 @@ public final class MathUtils {
 		return max;
 	}
 	
-	public static double max_i( int... nums ) {
+	public static int max_i( int... nums ) {
 		if ( nums.length == 0 ) {
 			return 0;
 		}
@@ -31,4 +31,29 @@ public final class MathUtils {
 		}
 		return max;
 	}
+	
+	public static double absMax( double... nums ) {
+		double[] abs = new double[nums.length];
+		for ( int i = 0; i < nums.length; i++ ) {
+			abs[i] = Math.abs( nums[i] );
+		}
+		return max( abs );
+	}
+	
+	public static int absMax_i( int... nums ) {
+		int[] abs = new int[nums.length];
+		for ( int i = 0; i < nums.length; i++ ) {
+			abs[i] = Math.abs( nums[i] );
+		}
+		return max_i( abs );
+	}
+	
+	public static boolean inRange_ex(double val, double min, double max) {
+		return min < val && val < max;
+	}
+	
+	public static boolean inRange(double val, double min, double max) {
+		return min <= val && val <= max;
+	}
+	
 }

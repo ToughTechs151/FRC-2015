@@ -1,11 +1,11 @@
 package org.usfirst.frc.team151.robot;
 
 import org.nashua.tt151.F310;
-import org.nashua.tt151.system.TankDrive;
+import org.nashua.tt151.system.MecanumDrive;
 
-import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot {
 	F310 driver = new F310( 0, 0.1 );
@@ -19,13 +19,12 @@ public class Robot extends SampleRobot {
 	public void autonomous() {}
 	
 	public void operatorControl() {
-		TankDrive.getInstance().init();
+		MecanumDrive.getInstance().init();
 		while ( isOperatorControl() && isEnabled() ) {
 			driver.query();
 			lifter.query();
-			
 //			SmartDashboard.putString( "DB/String 0", "" + gyro.getAngle() );
-			TankDrive.getInstance().operatorControl( driver, lifter );
+			MecanumDrive.getInstance().operatorControl( driver, lifter );
 		}
 	}
 	
