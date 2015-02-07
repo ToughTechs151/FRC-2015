@@ -11,6 +11,7 @@ public class Robot extends SampleRobot {
 	F310 driver = new F310( 0, 0.1 );
 	F310 lifter = new F310( 1, 0.1 );
 //	Gyro gyro = new Gyro( 0 );
+	RobotDrive myDrive = new RobotDrive(0, 2, 1, 3);
 	
 	public Robot() {
 		
@@ -19,12 +20,8 @@ public class Robot extends SampleRobot {
 	public void autonomous() {}
 	
 	public void operatorControl() {
-		MecanumDrive.getInstance().init();
 		while ( isOperatorControl() && isEnabled() ) {
-			driver.query();
-			lifter.query();
-//			SmartDashboard.putString( "DB/String 0", "" + gyro.getAngle() );
-			MecanumDrive.getInstance().operatorControl( driver, lifter );
+			myDrive.mecanumDrive_Cartesian(driver.getLeftY(), driver.getLeftX(), driver.getRightX(), 0);
 		}
 	}
 	
