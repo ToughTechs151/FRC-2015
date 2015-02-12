@@ -40,10 +40,10 @@ public class F310 extends Controller {
 	 * @author Kareem El-Faramawi
 	 */
 	public static final class Axis {
-		public static final int LEFT_X = 1;
-		public static final int LEFT_Y = 2;
-		public static final int RIGHT_X = 3;
-		public static final int RIGHT_Y = 4;
+		public static final int LEFT_X = 0;
+		public static final int LEFT_Y = 1;
+		public static final int RIGHT_X = 2;
+		public static final int RIGHT_Y = 3;
 		public static final int DPAD_X = 5;
 		public static final int DPAD_Y = 6;
 	}

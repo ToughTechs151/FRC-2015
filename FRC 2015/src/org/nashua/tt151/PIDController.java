@@ -2,22 +2,22 @@ package org.nashua.tt151;
 
 public class PIDController {
 	
-	double minInput;
-	double maxInput;
-	double minOutput;
-	double maxOutput;
+	double minInput = 0.0;
+	double maxInput = 0.0;
+	double minOutput = 0.0;
+	double maxOutput = 0.0;
 	
-	double setPoint;
-	double input;
-	double output;
+	double setPoint = 0.0;
+	double input = 0.0;
+	double output = 0.0;
 	
-	double prevError;
-	double error;
-	double totalError;
+	double prevError = 0.0;
+	double error = 0.0;
+	double totalError = 0.0;
 	
-	double kP;
-	double kI;
-	double kD;
+	double kP = 0.0;
+	double kI = 0.0;
+	double kD = 0.0;
 	
 	public PIDController( double proportional, double integral, double derivative ) {
 		setPID( proportional, integral, derivative );
