@@ -24,7 +24,7 @@ public class MecanumDrive extends Subsystem {
 	// Gyro for mecanum compensation
 	Gyro gyro = new Gyro( 0 ); // CHECK PORT
 	// double gyroAngle;
-	PIDController gyroController = new PIDController( 0.04, 0.0, 0.0);
+	PIDController gyroController = new PIDController( 0.02, 0.0, 0.0 );
 	
 	// Multiplier to scale speed
 	double mult = 0.0;
@@ -47,22 +47,27 @@ public class MecanumDrive extends Subsystem {
 	
 	boolean compensationEnabled = true;
 	
-	
-	
 	private MecanumDrive() {
 		new Timer().scheduleAtFixedRate( new TimerTask() {
 			
 			@Override
 			public void run() {
-//				gyroController.setSetpoint( gyroController.getSetpoint() + clockwise * 0.427 );
-				gyroController.setSetpoint( gyroController.getSetpoint() + rawClockwise * 0.05);
+				if ( Math.abs( gyro.getAngle() ) < 1e5 ) {
+					if ( rawClockwise != 0.0 || Math.abs( gyro.getAngle() - gyroController.getSetpoint() ) > 90 ) {
+						// resetGyro();
+						
+						gyroController.setSetpoint( gyro.getAngle() );
+						
+					}
+				}
+				System.out.println(gyro.getAngle());
+				
 				gyroController.setInput( gyro.getAngle() );
 				rotAdj = gyroController.performPID();
 			}
 		}, 1, 1 );
 		gyroController.setInputRange( -3600000, 3600000 );
 		gyroController.setOutputRange( -1.0, 1.0 );
-		gyro.setSensitivity( 0.025 );
 	}
 	
 	public static MecanumDrive getInstance() {
@@ -74,6 +79,10 @@ public class MecanumDrive extends Subsystem {
 	
 	@Override
 	public void init() {
+		resetGyro();
+	}
+	
+	public void resetGyro() {
 		gyro.reset();
 		gyroController.reset();
 	}
@@ -88,28 +97,32 @@ public class MecanumDrive extends Subsystem {
 		right = driver.getLeftX() * mult;
 		rawClockwise = driver.getRightX();
 		
+		SmartDashboard.putNumber( "DB/Slider 0", forward );
+		SmartDashboard.putNumber( "DB/Slider 1", right );
+		SmartDashboard.putNumber( "DB/Slider 2", rawClockwise );
+		
 		// Rotation scaling for smoothness
 		rawClockwise *= 0.5;
 		
-//		// angleSetpoint += clockwise * 0.01;
-//		gyroController.setSetpoint( gyroController.getSetpoint() + clockwise * 0.427 );
-//		gyroController.setInput( gyro.getAngle() );
-		
 		clockwise = rawClockwise;
 		if ( compensationEnabled ) {
-//			// Apply rotation adjustment
-			 clockwise += rotAdj;
+			// // Apply rotation adjustment
+			clockwise += rotAdj;
 		}
 		
-		SmartDashboard.putString( "DB/String 5", "Gyro: " + (double)((int)(gyro.getAngle() * 1e4))/1e4 );
-		SmartDashboard.putString( "DB/String 6", "Set: " + (double)((int)(gyroController.getSetpoint() * 1e4))/1e4 );
+		SmartDashboard.putString( "DB/String 5", "Gyro: " + (double) ( (int) ( gyro.getAngle() * 1e4 ) ) / 1e4 );
+		SmartDashboard.putString( "DB/String 6", "Set: " + (double) ( (int) ( gyroController.getSetpoint() * 1e4 ) ) / 1e4 );
 		SmartDashboard.putString( "DB/String 7", "Clk: " + clockwise );
-
+		
 		// toggle compensation
 		if ( driver.getButtonReleased( F310.Button.Y ) ) {
 			compensationEnabled = !compensationEnabled;
 		}
 		SmartDashboard.putString( "DB/String 4", "Comp: " + compensationEnabled );
+		
+		if ( driver.getButtonPressed( F310.Button.X ) ) {
+			resetGyro();
+		}
 		
 		// Apply inverse kinematic transformation to convert axis readings to motor values
 		fl = forward + right + clockwise;
@@ -127,8 +140,8 @@ public class MecanumDrive extends Subsystem {
 		}
 		// Set motor speeds
 		set( fl, fr, rl, rr );
-//		set(driver.getRightX(), driver.getLeftX(), driver.getRightY(),0);
-//		set( driver.getLeftX(), driver.getLeftX(), driver.getLeftX(), driver.getLeftX() );
+		// set(driver.getRightX(), driver.getLeftX(), driver.getRightY(),0);
+		// set( driver.getLeftX(), driver.getLeftX(), driver.getLeftX(), driver.getLeftX() );
 	}
 	
 	private double getMultiplier( F310 driver ) {

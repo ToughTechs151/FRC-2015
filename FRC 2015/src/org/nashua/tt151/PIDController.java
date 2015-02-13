@@ -59,6 +59,10 @@ public class PIDController {
 		return kD;
 	}
 	
+	public double getError() {
+		return error;
+	}
+	
 	public double getOutput() {
 		return output;
 	}

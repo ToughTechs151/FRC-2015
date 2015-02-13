@@ -56,4 +56,7 @@ public final class MathUtils {
 		return min <= val && val <= max;
 	}
 	
+	public static void floor(double val, int places) {
+		
+	}
 }
