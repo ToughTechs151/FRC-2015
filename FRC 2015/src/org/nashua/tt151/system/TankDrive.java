@@ -2,9 +2,7 @@ package org.nashua.tt151.system;
 
 import org.nashua.tt151.F310;
 
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Timer;
 
 public class TankDrive extends Subsystem {
 	private static TankDrive INSTANCE = null;

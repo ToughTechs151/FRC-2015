@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import org.nashua.tt151.F310;
 import org.nashua.tt151.MathUtils;
 import org.nashua.tt151.PIDController;
+import org.nashua.tt151.RobotMap;
 
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Talon;
@@ -16,15 +17,15 @@ public class MecanumDrive extends Subsystem {
 	private static MecanumDrive INSTANCE = null;
 	
 	// Motor controllers
-	Talon frontLeft = new Talon( 0 );
-	Talon frontRight = new Talon( 1 );
-	Talon rearLeft = new Talon( 2 );
-	Talon rearRight = new Talon( 3 );
+	Talon frontLeft = new Talon( RobotMap.PWM.MECANUM_FL );
+	Talon frontRight = new Talon( RobotMap.PWM.MECANUM_FR );
+	Talon rearLeft = new Talon( RobotMap.PWM.MECANUM_RL );
+	Talon rearRight = new Talon( RobotMap.PWM.MECANUM_RR );
 	
 	// Gyro for mecanum compensation
-	Gyro gyro = new Gyro( 0 ); // CHECK PORT
+	Gyro gyro = new Gyro( RobotMap.ANALOG.GYRO );
 	// double gyroAngle;
-	PIDController gyroController = new PIDController( 0.02, 0.0, 0.0 );
+	PIDController gyroController = new PIDController( 0.015, 0.0, 0.0 );
 	
 	// Multiplier to scale speed
 	double mult = 0.0;
@@ -60,7 +61,7 @@ public class MecanumDrive extends Subsystem {
 						
 					}
 				}
-				System.out.println(gyro.getAngle());
+				System.out.println( gyro.getAngle() );
 				
 				gyroController.setInput( gyro.getAngle() );
 				rotAdj = gyroController.performPID();
@@ -97,9 +98,9 @@ public class MecanumDrive extends Subsystem {
 		right = driver.getLeftX() * mult;
 		rawClockwise = driver.getRightX();
 		
-		SmartDashboard.putNumber( "DB/Slider 0", forward );
-		SmartDashboard.putNumber( "DB/Slider 1", right );
-		SmartDashboard.putNumber( "DB/Slider 2", rawClockwise );
+		SmartDashboard.putNumber( "DB/Slider 0", MathUtils.round( forward, 5 ) );
+		SmartDashboard.putNumber( "DB/Slider 1", MathUtils.round( right, 5 ) );
+		SmartDashboard.putNumber( "DB/Slider 2", MathUtils.round( rawClockwise, 5 ) );
 		
 		// Rotation scaling for smoothness
 		rawClockwise *= 0.5;
@@ -110,9 +111,10 @@ public class MecanumDrive extends Subsystem {
 			clockwise += rotAdj;
 		}
 		
-		SmartDashboard.putString( "DB/String 5", "Gyro: " + (double) ( (int) ( gyro.getAngle() * 1e4 ) ) / 1e4 );
-		SmartDashboard.putString( "DB/String 6", "Set: " + (double) ( (int) ( gyroController.getSetpoint() * 1e4 ) ) / 1e4 );
-		SmartDashboard.putString( "DB/String 7", "Clk: " + clockwise );
+		SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
+		SmartDashboard.putString( "DB/String 6", "Set: " + MathUtils.round( gyroController.getSetpoint(), 5 ) );
+		SmartDashboard.putString( "DB/String 7", "Clk: " + MathUtils.round( clockwise, 5 ) );
+		SmartDashboard.putString( "DB/String 8", "Adj: " + MathUtils.round( rotAdj, 5 ) );
 		
 		// toggle compensation
 		if ( driver.getButtonReleased( F310.Button.Y ) ) {
@@ -159,9 +161,9 @@ public class MecanumDrive extends Subsystem {
 		rearLeft.set( rl );
 		rearRight.set( -rr );
 		
-		SmartDashboard.putString( "DB/String 0", "FL: " + fl );
-		SmartDashboard.putString( "DB/String 1", "FR: " + fr );
-		SmartDashboard.putString( "DB/String 2", "RL: " + rl );
-		SmartDashboard.putString( "DB/String 3", "RR: " + rr );
+		SmartDashboard.putString( "DB/String 0", "FL: " + MathUtils.round( fl, 5 ) );
+		SmartDashboard.putString( "DB/String 1", "FR: " + MathUtils.round( fr, 5 ) );
+		SmartDashboard.putString( "DB/String 2", "RL: " + MathUtils.round( rl, 5 ) );
+		SmartDashboard.putString( "DB/String 3", "RR: " + MathUtils.round( rr, 5 ) );
 	}
 }

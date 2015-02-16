@@ -48,15 +48,26 @@ public final class MathUtils {
 		return max_i( abs );
 	}
 	
-	public static boolean inRange_ex(double val, double min, double max) {
+	public static boolean inRange_ex( double val, double min, double max ) {
 		return min < val && val < max;
 	}
 	
-	public static boolean inRange(double val, double min, double max) {
+	public static boolean inRange( double val, double min, double max ) {
 		return min <= val && val <= max;
 	}
 	
-	public static void floor(double val, int places) {
-		
+	public static double floor( double val, int places ) {
+		double pow = Math.pow( 10, places );
+		return Math.floor( val * pow ) / pow;
+	}
+	
+	public static double round( double val, int places ) {
+		double pow = Math.pow( 10, places );
+		return Math.round( val * pow ) / pow;
+	}
+	
+	public static double ceil( double val, int places ) {
+		double pow = Math.pow( 10, places );
+		return Math.ceil( val * pow ) / pow;
 	}
 }
