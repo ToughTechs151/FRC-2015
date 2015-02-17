@@ -111,7 +111,7 @@ public class MecanumDrive extends Subsystem {
 			clockwise += rotAdj;
 		}
 		
-		SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
+		//SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
 		SmartDashboard.putString( "DB/String 6", "Set: " + MathUtils.round( gyroController.getSetpoint(), 5 ) );
 		SmartDashboard.putString( "DB/String 7", "Clk: " + MathUtils.round( clockwise, 5 ) );
 		SmartDashboard.putString( "DB/String 8", "Adj: " + MathUtils.round( rotAdj, 5 ) );
