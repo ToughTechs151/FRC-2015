@@ -1,6 +1,9 @@
 package org.nashua.tt151.system;
 
-import org.nashua.tt151.F310;
+import java.io.IOException;
+
+import org.nashua.tt151.DashboardConnection;
+import org.nashua.tt151.lib.F310;
 
 /**
  * Base for all subsystems on the robot
@@ -33,7 +36,7 @@ public abstract class Subsystem {
 	 * Send data about the subsystem to the dashboard
 	 * @param dash 
 	 */
-//	public abstract void updateDashboard(Dash dash) throws IOException;
+	public abstract void updateDashboard(DashboardConnection dash) throws IOException;
 
 	/**
 	 * Method to be called from the Tele-Op loop

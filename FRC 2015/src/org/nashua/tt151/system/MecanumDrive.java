@@ -1,16 +1,19 @@
 package org.nashua.tt151.system;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.nashua.tt151.F310;
-import org.nashua.tt151.MathUtils;
-import org.nashua.tt151.PIDController;
+import org.nashua.tt151.DashboardConnection;
 import org.nashua.tt151.RobotMap;
+import org.nashua.tt151.lib.F310;
+import org.nashua.tt151.lib.PIDController;
+import org.nashua.tt151.protocol.JSONEncoder;
+import org.nashua.tt151.protocol.JSONEncoder.DeviceType;
+import org.nashua.tt151.util.MathUtils;
 
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MecanumDrive extends Subsystem {
 	// Singleton instance
@@ -53,10 +56,12 @@ public class MecanumDrive extends Subsystem {
 			
 			@Override
 			public void run() {
+				// SmartDashboard.putString( "DB/String 3", "" + MathUtils.round( gyro.getRate(), 5 ) );
+				// Some random really high values appear, so ignore those
 				if ( Math.abs( gyro.getAngle() ) < 1e5 ) {
-					if ( rawClockwise != 0.0 || Math.abs( gyro.getAngle() - gyroController.getSetpoint() ) > 90 ) {
+					
+					if ( rawClockwise != 0.0 || ( forward == 0 && right == 0 && Math.abs( gyro.getRate() ) <= 45 ) || Math.abs( gyro.getAngle() - gyroController.getSetpoint() ) > 90 ) {
 						// resetGyro();
-						
 						gyroController.setSetpoint( gyro.getAngle() );
 						
 					}
@@ -86,6 +91,7 @@ public class MecanumDrive extends Subsystem {
 	public void resetGyro() {
 		gyro.reset();
 		gyroController.reset();
+		gyroController.setSetpoint( 0 );
 	}
 	
 	@Override
@@ -93,17 +99,28 @@ public class MecanumDrive extends Subsystem {
 		// Get multiplier to scale speed
 		mult = getMultiplier( driver );
 		
+		// toggle compensation
+		if ( driver.getButtonReleased( F310.Button.Y ) ) {
+			compensationEnabled = !compensationEnabled;
+		}
+		// SmartDashboard.putString( "DB/String 4", "Comp: " + compensationEnabled );
+		
+		if ( driver.getButtonPressed( F310.Button.X ) ) {
+			resetGyro();
+		}
+		
 		// Get axis readings
 		forward = -driver.getLeftY() * mult; // CHECK SIGN
 		right = driver.getLeftX() * mult;
-		rawClockwise = driver.getRightX();
+		rawClockwise = driver.getRightX() * mult;
 		
-		SmartDashboard.putNumber( "DB/Slider 0", MathUtils.round( forward, 5 ) );
-		SmartDashboard.putNumber( "DB/Slider 1", MathUtils.round( right, 5 ) );
-		SmartDashboard.putNumber( "DB/Slider 2", MathUtils.round( rawClockwise, 5 ) );
-		
-		// Rotation scaling for smoothness
-		rawClockwise *= 0.5;
+		mecanumDrive();
+	}
+	
+	private void mecanumDrive() {
+		// SmartDashboard.putNumber( "DB/Slider 0", MathUtils.round( forward, 5 ) );
+		// SmartDashboard.putNumber( "DB/Slider 1", MathUtils.round( right, 5 ) );
+		// SmartDashboard.putNumber( "DB/Slider 2", MathUtils.round( rawClockwise, 5 ) );
 		
 		clockwise = rawClockwise;
 		if ( compensationEnabled ) {
@@ -111,20 +128,11 @@ public class MecanumDrive extends Subsystem {
 			clockwise += rotAdj;
 		}
 		
-		//SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
-		SmartDashboard.putString( "DB/String 6", "Set: " + MathUtils.round( gyroController.getSetpoint(), 5 ) );
-		SmartDashboard.putString( "DB/String 7", "Clk: " + MathUtils.round( clockwise, 5 ) );
-		SmartDashboard.putString( "DB/String 8", "Adj: " + MathUtils.round( rotAdj, 5 ) );
-		
-		// toggle compensation
-		if ( driver.getButtonReleased( F310.Button.Y ) ) {
-			compensationEnabled = !compensationEnabled;
-		}
-		SmartDashboard.putString( "DB/String 4", "Comp: " + compensationEnabled );
-		
-		if ( driver.getButtonPressed( F310.Button.X ) ) {
-			resetGyro();
-		}
+		// SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
+		// SmartDashboard.putString( "DB/String 6", "Set: " + MathUtils.round( gyroController.getSetpoint(), 5
+		// ) );
+		// SmartDashboard.putString( "DB/String 7", "Clk: " + MathUtils.round( clockwise, 5 ) );
+		// SmartDashboard.putString( "DB/String 8", "Adj: " + MathUtils.round( rotAdj, 5 ) );
 		
 		// Apply inverse kinematic transformation to convert axis readings to motor values
 		fl = forward + right + clockwise;
@@ -161,9 +169,35 @@ public class MecanumDrive extends Subsystem {
 		rearLeft.set( rl );
 		rearRight.set( -rr );
 		
-		SmartDashboard.putString( "DB/String 0", "FL: " + MathUtils.round( fl, 5 ) );
-		SmartDashboard.putString( "DB/String 1", "FR: " + MathUtils.round( fr, 5 ) );
-		SmartDashboard.putString( "DB/String 2", "RL: " + MathUtils.round( rl, 5 ) );
-		SmartDashboard.putString( "DB/String 3", "RR: " + MathUtils.round( rr, 5 ) );
+		// SmartDashboard.putString( "DB/String 0", "FL: " + MathUtils.round( fl, 5 ) );
+		// SmartDashboard.putString( "DB/String 1", "FR: " + MathUtils.round( fr, 5 ) );
+		// SmartDashboard.putString( "DB/String 2", "RL: " + MathUtils.round( rl, 5 ) );
+		// SmartDashboard.putString( "DB/String 3", "RR: " + MathUtils.round( rr, 5 ) );
+	}
+	
+	public void drive( double direction, double speed, long mTime ) {
+		speed = MathUtils.clamp( speed, 0, 1 );
+		forward = Math.cos( direction ) * speed;
+		right = Math.sin( direction ) * speed;
+		mTime = (long) MathUtils.clamp( mTime, 0, 10000 );
+		long start = System.currentTimeMillis();
+		while ( ( System.currentTimeMillis() - start ) < mTime ) {
+			mecanumDrive();
+		}
+		forward = 0;
+		right = 0;
+		rawClockwise = 0;
+		mecanumDrive();
+		resetGyro();
+	}
+	
+	@Override
+	public void updateDashboard( DashboardConnection dash ) throws IOException {
+		dash.send( JSONEncoder.encodePWM( frontLeft.get(), RobotMap.PWM.MECANUM_FL, "FL", DeviceType.PWM.TALON ) );
+		dash.send( JSONEncoder.encodePWM( frontRight.get(), RobotMap.PWM.MECANUM_FR, "FR", DeviceType.PWM.TALON ) );
+		dash.send( JSONEncoder.encodePWM( rearLeft.get(), RobotMap.PWM.MECANUM_RL, "RL", DeviceType.PWM.TALON ) );
+		dash.send( JSONEncoder.encodePWM( rearRight.get(), RobotMap.PWM.MECANUM_RR, "RR", DeviceType.PWM.TALON ) );
+		dash.send( JSONEncoder.encodeAnalog( gyro.getAngle(), RobotMap.ANALOG.GYRO, "Gyro", DeviceType.ANALOG.GYRO ) );
+		
 	}
 }

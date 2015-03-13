@@ -18,6 +18,7 @@ public final class RobotMap {
 	
 	public static final class DIO {
 		public static final int TOP_LIM = 0;
+		public static final int BOTTOM_LIM = 1;
 	}
 	
 }
