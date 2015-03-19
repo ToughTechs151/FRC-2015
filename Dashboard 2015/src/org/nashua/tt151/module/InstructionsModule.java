@@ -15,21 +15,21 @@ import org.nashua.tt151.util.FileIOHelper;
 public class InstructionsModule extends JPanel {
 	private BufferedImage driver;
 	private BufferedImage shooter;
-
+	
 	public InstructionsModule() {
 		driver = FileIOHelper.loadImage( "/img/driver.png" );
-		shooter = FileIOHelper.loadImage( "/img/shooter.png" );
-		setPreferredSize( new Dimension(Math.max( driver.getWidth(), shooter.getWidth() ), driver.getHeight() + shooter.getHeight()) );
+		shooter = FileIOHelper.loadImage( "/img/lifter.png" );
+		setPreferredSize( new Dimension( Math.max( driver.getWidth(), shooter.getWidth() ), driver.getHeight() + shooter.getHeight() ) );
 		setSize( getPreferredSize() );
 		setBackground( Color.GRAY.darker() );
 	}
 	
 	public void paintComponent( Graphics g ) {
-		//Draw images
+		// Draw images
 		g.drawImage( driver, 0, 0, this );
 		g.drawImage( shooter, 0, driver.getHeight(), this );
 		
-		//Draw separator
+		// Draw separator
 		Graphics2D g2d = (Graphics2D) g;
 		Paint oldPaint = g2d.getPaint();
 		g2d.setPaint( new LinearGradientPaint( 0, driver.getHeight(), getWidth(), driver.getHeight(), new float[] { 0.0f, 0.5f, 1.0f }, new Color[] { getBackground(), Color.WHITE, getBackground() } ) );

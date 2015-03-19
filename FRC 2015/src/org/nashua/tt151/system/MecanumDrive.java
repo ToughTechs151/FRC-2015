@@ -99,15 +99,31 @@ public class MecanumDrive extends Subsystem {
 		// Get multiplier to scale speed
 		mult = getMultiplier( driver );
 		
-		// toggle compensation
-		if ( driver.getButtonReleased( F310.Button.Y ) ) {
+		if ( driver.getButtonPressed( F310.Button.Y ) ) {
 			compensationEnabled = !compensationEnabled;
 		}
-		// SmartDashboard.putString( "DB/String 4", "Comp: " + compensationEnabled );
 		
 		if ( driver.getButtonPressed( F310.Button.X ) ) {
 			resetGyro();
 		}
+		//
+		
+		// Debugging
+		// if ( driver.getButtonReleased( F310.Button.Y ) ) {
+		// drive( 0, 0.25, 0, 2000 );
+		// }
+		//
+		// if ( driver.getButtonReleased( F310.Button.A ) ) {
+		// drive( 180, 0.25, 0, 2000 );
+		// }
+		//
+		// if ( driver.getButtonReleased( F310.Button.B ) ) {
+		// drive( 90, 0.5, 0, 2000 );
+		// }
+		//
+		// if ( driver.getButtonReleased( F310.Button.X ) ) {
+		// drive( -90, 0.5, 0, 2000 );
+		// }
 		
 		// Get axis readings
 		forward = -driver.getLeftY() * mult; // CHECK SIGN
@@ -118,21 +134,11 @@ public class MecanumDrive extends Subsystem {
 	}
 	
 	private void mecanumDrive() {
-		// SmartDashboard.putNumber( "DB/Slider 0", MathUtils.round( forward, 5 ) );
-		// SmartDashboard.putNumber( "DB/Slider 1", MathUtils.round( right, 5 ) );
-		// SmartDashboard.putNumber( "DB/Slider 2", MathUtils.round( rawClockwise, 5 ) );
-		
 		clockwise = rawClockwise;
 		if ( compensationEnabled ) {
-			// // Apply rotation adjustment
+			// Apply rotation adjustment
 			clockwise += rotAdj;
 		}
-		
-		// SmartDashboard.putString( "DB/String 5", "Gyro: " + MathUtils.round( gyro.getAngle(), 5 ) );
-		// SmartDashboard.putString( "DB/String 6", "Set: " + MathUtils.round( gyroController.getSetpoint(), 5
-		// ) );
-		// SmartDashboard.putString( "DB/String 7", "Clk: " + MathUtils.round( clockwise, 5 ) );
-		// SmartDashboard.putString( "DB/String 8", "Adj: " + MathUtils.round( rotAdj, 5 ) );
 		
 		// Apply inverse kinematic transformation to convert axis readings to motor values
 		fl = forward + right + clockwise;
@@ -148,10 +154,9 @@ public class MecanumDrive extends Subsystem {
 			rl /= max;
 			rr /= max;
 		}
+		
 		// Set motor speeds
 		set( fl, fr, rl, rr );
-		// set(driver.getRightX(), driver.getLeftX(), driver.getRightY(),0);
-		// set( driver.getLeftX(), driver.getLeftX(), driver.getLeftX(), driver.getLeftX() );
 	}
 	
 	private double getMultiplier( F310 driver ) {
@@ -168,22 +173,20 @@ public class MecanumDrive extends Subsystem {
 		frontRight.set( -fr );
 		rearLeft.set( rl );
 		rearRight.set( -rr );
-		
-		// SmartDashboard.putString( "DB/String 0", "FL: " + MathUtils.round( fl, 5 ) );
-		// SmartDashboard.putString( "DB/String 1", "FR: " + MathUtils.round( fr, 5 ) );
-		// SmartDashboard.putString( "DB/String 2", "RL: " + MathUtils.round( rl, 5 ) );
-		// SmartDashboard.putString( "DB/String 3", "RR: " + MathUtils.round( rr, 5 ) );
 	}
 	
-	public void drive( double direction, double speed, long mTime ) {
+	public void drive( double direction, double speed, double clockwiseSpeed, long mTime ) {
 		speed = MathUtils.clamp( speed, 0, 1 );
-		forward = Math.cos( direction ) * speed;
-		right = Math.sin( direction ) * speed;
+		forward = Math.cos( Math.toRadians( direction ) ) * speed;
+		right = Math.sin( Math.toRadians( direction ) ) * speed;
+		rawClockwise = MathUtils.clamp( clockwiseSpeed, -1.0, 1.0 );
 		mTime = (long) MathUtils.clamp( mTime, 0, 10000 );
 		long start = System.currentTimeMillis();
 		while ( ( System.currentTimeMillis() - start ) < mTime ) {
 			mecanumDrive();
 		}
+		
+		// Reset everything
 		forward = 0;
 		right = 0;
 		rawClockwise = 0;
@@ -198,6 +201,6 @@ public class MecanumDrive extends Subsystem {
 		dash.send( JSONEncoder.encodePWM( rearLeft.get(), RobotMap.PWM.MECANUM_RL, "RL", DeviceType.PWM.TALON ) );
 		dash.send( JSONEncoder.encodePWM( rearRight.get(), RobotMap.PWM.MECANUM_RR, "RR", DeviceType.PWM.TALON ) );
 		dash.send( JSONEncoder.encodeAnalog( gyro.getAngle(), RobotMap.ANALOG.GYRO, "Gyro", DeviceType.ANALOG.GYRO ) );
-		
+		dash.send( JSONEncoder.encodeDIO( compensationEnabled, 9, "Compensation", DeviceType.DIO.LIMIT ) );
 	}
 }

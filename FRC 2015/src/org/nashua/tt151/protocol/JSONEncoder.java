@@ -57,8 +57,8 @@ public class JSONEncoder {
 		return encode( value, channel, JSONConstants.TYPE_DEVICE_PWM, name, type );
 	}
 	
-	public static JSONMessage encodeDIO( DigitalInput lim, int channel, String name, String type ) {
-		return encode( lim.get() ? 1.0 : 0.0, channel, JSONConstants.TYPE_DEVICE_DIO, name, type );
+	public static JSONMessage encodeDIO( boolean value, int channel, String name, String type ) {
+		return encode( value ? 1.0 : 0.0, channel, JSONConstants.TYPE_DEVICE_DIO, name, type );
 	}
 	
 	public static JSONMessage encodeDIO( double value, int channel, String name, String type ) {

@@ -17,6 +17,7 @@ import org.hyperic.sigar.SigarException;
 
 /**
  * Monitors bandwidth usage between dashboard and robot
+ * 
  * @author Brian Ashworth
  */
 public class BandwidthModule extends JPanel {
@@ -60,7 +61,7 @@ public class BandwidthModule extends JPanel {
 										indices++;
 									}
 								}
-								average = averageTemp / indices;
+								average = indices != 0 ? averageTemp / indices : 0;
 								averageTemp = 0;
 								peak = Math.max( current, peak );
 							}

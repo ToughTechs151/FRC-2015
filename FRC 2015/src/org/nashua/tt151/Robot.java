@@ -94,7 +94,7 @@ public class Robot extends SampleRobot {
 	
 	public void autonomous() {
 		MecanumDrive.getInstance().init();
-		MecanumDrive.getInstance().drive( 0, 0.75, 1250 );
+		MecanumDrive.getInstance().drive( 0, 0.75, 0, 1250 );
 	}
 	
 	public void operatorControl() {
