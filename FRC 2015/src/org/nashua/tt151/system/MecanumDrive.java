@@ -27,7 +27,8 @@ public class MecanumDrive extends Subsystem {
 	
 	// Gyro for mecanum compensation
 	Gyro gyro = new Gyro( RobotMap.ANALOG.GYRO );
-	// double gyroAngle;
+	
+	// Controller for calculating the rotation adjustment needed for stable driving
 	PIDController gyroController = new PIDController( 0.015, 0.0, 0.0 );
 	
 	// Multiplier to scale speed
@@ -36,9 +37,9 @@ public class MecanumDrive extends Subsystem {
 	// Axis readings for inverse kinematic transformation
 	double forward = 0.0; // fwd/rev
 	double right = 0.0; // left/right
-	double rawClockwise = 0.0; // rotation
-	double clockwise = 0.0;
-	double rotAdj = 0.0;
+	double rawClockwise = 0.0; // Raw rotation speed read from the controller
+	double clockwise = 0.0; // Rotation speed used in IKT calculation
+	double rotAdj = 0.0; // Adjustement to the rotation to compensate for wheel slipping / CoG
 	
 	// Speeds of each motor
 	double fl = 0.0;
@@ -52,29 +53,46 @@ public class MecanumDrive extends Subsystem {
 	boolean compensationEnabled = true;
 	
 	private MecanumDrive() {
+		/*
+		 * The sets up the gyro compensation thread to correct the robot's driving with a PID controller
+		 */
 		new Timer().scheduleAtFixedRate( new TimerTask() {
 			
 			@Override
 			public void run() {
-				// SmartDashboard.putString( "DB/String 3", "" + MathUtils.round( gyro.getRate(), 5 ) );
-				// Some random really high values appear, so ignore those
+				
+				/*
+				 * Every so often the gyro will give a value of what appears to be integer max, causing the
+				 * bot to spin full speed to compensate for the huge "change" in rotation, and knocking the
+				 * life out of anything and anybody that was unfortunately near it, then it tips over, breaks
+				 * its arms, and dies.
+				 * This will ignore that :)
+				 */
 				if ( Math.abs( gyro.getAngle() ) < 1e5 ) {
 					
+					/*
+					 * There are 3 cases here where the PID controller's setpoint is reset:
+					 * 1. rawClockwise != 0.0 -> If the robot is currently rotating, there's no point in compensating
+					 * 2. ( forward == 0 && right == 0 && Math.abs( gyro.getRate() ) <= 45 ) -> The robot isn't moving
+					 * 3. ( Math.abs( gyro.getAngle() - gyroController.getSetpoint() ) > 90 ) ) -> The target angle is more than 90 degrees away
+					 */
 					if ( rawClockwise != 0.0 || ( forward == 0 && right == 0 && Math.abs( gyro.getRate() ) <= 45 ) || Math.abs( gyro.getAngle() - gyroController.getSetpoint() ) > 90 ) {
-						// resetGyro();
 						gyroController.setSetpoint( gyro.getAngle() );
-						
 					}
 				}
-				System.out.println( gyro.getAngle() );
 				
+				// Update the PID controller and get the new adjustment value
 				gyroController.setInput( gyro.getAngle() );
 				rotAdj = gyroController.performPID();
 			}
 		}, 1, 1 );
+		
+		// PID setup
 		gyroController.setInputRange( -3600000, 3600000 );
 		gyroController.setOutputRange( -1.0, 1.0 );
 	}
+	
+	// Singleton stuff
 	
 	public static MecanumDrive getInstance() {
 		if ( INSTANCE == null ) {
@@ -83,11 +101,16 @@ public class MecanumDrive extends Subsystem {
 		return INSTANCE;
 	}
 	
+	// Implementing the subsystem methods
+	
 	@Override
 	public void init() {
 		resetGyro();
 	}
 	
+	/**
+	 * Resets everything relating to the gyro
+	 */
 	public void resetGyro() {
 		gyro.reset();
 		gyroController.reset();
@@ -96,45 +119,34 @@ public class MecanumDrive extends Subsystem {
 	
 	@Override
 	public void operatorControl( F310 driver, F310 lifter ) {
-		// Get multiplier to scale speed
+		// Get multiplier to scale drive speed
 		mult = getMultiplier( driver );
 		
+		// A switch to enable or disable compensation
 		if ( driver.getButtonPressed( F310.Button.Y ) ) {
 			compensationEnabled = !compensationEnabled;
 		}
 		
+		// A switch to reset the gyro
 		if ( driver.getButtonPressed( F310.Button.X ) ) {
 			resetGyro();
 		}
-		//
-		
-		// Debugging
-		// if ( driver.getButtonReleased( F310.Button.Y ) ) {
-		// drive( 0, 0.25, 0, 2000 );
-		// }
-		//
-		// if ( driver.getButtonReleased( F310.Button.A ) ) {
-		// drive( 180, 0.25, 0, 2000 );
-		// }
-		//
-		// if ( driver.getButtonReleased( F310.Button.B ) ) {
-		// drive( 90, 0.5, 0, 2000 );
-		// }
-		//
-		// if ( driver.getButtonReleased( F310.Button.X ) ) {
-		// drive( -90, 0.5, 0, 2000 );
-		// }
 		
 		// Get axis readings
-		forward = -driver.getLeftY() * mult; // CHECK SIGN
+		forward = -driver.getLeftY() * mult;
 		right = driver.getLeftX() * mult;
 		rawClockwise = driver.getRightX() * mult;
 		
+		// Everything is ready, so calculate and set wheel speeds
 		mecanumDrive();
 	}
 	
+	/**
+	 * Applies the Inverse Kinematic Transformation to calculate and then set the wheel speeds
+	 */
 	private void mecanumDrive() {
 		clockwise = rawClockwise;
+		
 		if ( compensationEnabled ) {
 			// Apply rotation adjustment
 			clockwise += rotAdj;
@@ -159,15 +171,29 @@ public class MecanumDrive extends Subsystem {
 		set( fl, fr, rl, rr );
 	}
 	
+	/**
+	 * Gets the multiplier used for scaling the drive speed
+	 * 
+	 * @param driver Controller to check buttons from
+	 * @return Multiplier value
+	 */
 	private double getMultiplier( F310 driver ) {
 		if ( driver.getButton( F310.Button.LEFT_TRIGGER ) ) {
-			return 0.25;
+			return 0.25; // Creep mode
 		} else if ( driver.getButton( F310.Button.RIGHT_TRIGGER ) ) {
-			return 1;
+			return 1; // Turbo mode
 		}
-		return 0.5;
+		return 0.5; // Default 50% speed
 	}
 	
+	/**
+	 * Sets the speeds of all wheel motots
+	 * 
+	 * @param fl Front Left speed
+	 * @param fr Front Right speed
+	 * @param rl Rear Left speed
+	 * @param rr Rear Right speed
+	 */
 	public void set( double fl, double fr, double rl, double rr ) {
 		frontLeft.set( fl );
 		frontRight.set( -fr );
@@ -175,12 +201,24 @@ public class MecanumDrive extends Subsystem {
 		rearRight.set( -rr );
 	}
 	
+	/**
+	 * Autonomously drives the robot for a set period of time
+	 * 
+	 * @param direction Direction in degrees to drive the robot
+	 * @param speed How fast the robot should drive
+	 * @param clockwiseSpeed How fast the robot should rotate
+	 * @param mTime How long the driving should go on before stopping
+	 */
 	public void drive( double direction, double speed, double clockwiseSpeed, long mTime ) {
 		speed = MathUtils.clamp( speed, 0, 1 );
 		forward = Math.cos( Math.toRadians( direction ) ) * speed;
 		right = Math.sin( Math.toRadians( direction ) ) * speed;
 		rawClockwise = MathUtils.clamp( clockwiseSpeed, -1.0, 1.0 );
+		
+		// Clamp the running time to no more than 10 seconds, since autonomous is that long
 		mTime = (long) MathUtils.clamp( mTime, 0, 10000 );
+		
+		// Run until the given time is reached
 		long start = System.currentTimeMillis();
 		while ( ( System.currentTimeMillis() - start ) < mTime ) {
 			mecanumDrive();

@@ -12,13 +12,24 @@ import javax.swing.JPanel;
 
 import org.nashua.tt151.util.FileIOHelper;
 
+/**
+ * Module to display driver/shooter controls on the side of the dash
+ * 
+ * @author Kareem El-Faramawi
+ */
 public class InstructionsModule extends JPanel {
+	// Controller images
 	private BufferedImage driver;
 	private BufferedImage shooter;
 	
+	/**
+	 * Initializes the intruction module
+	 */
 	public InstructionsModule() {
+		// Load images
 		driver = FileIOHelper.loadImage( "/img/driver.png" );
 		shooter = FileIOHelper.loadImage( "/img/lifter.png" );
+		
 		setPreferredSize( new Dimension( Math.max( driver.getWidth(), shooter.getWidth() ), driver.getHeight() + shooter.getHeight() ) );
 		setSize( getPreferredSize() );
 		setBackground( Color.GRAY.darker() );

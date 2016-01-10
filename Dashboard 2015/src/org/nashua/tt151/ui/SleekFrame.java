@@ -19,18 +19,23 @@ import javax.swing.JFrame;
 
 import org.nashua.tt151.util.FileIOHelper;
 
+/**
+ * A JFrame with a custom window, because the default OS style is way too mainstream
+ * 
+ * @author Kareem El-Faramawi
+ */
 public class SleekFrame extends JFrame implements MouseListener, MouseMotionListener {
 	public final static int TITLE_HEIGHT = 28;
 	public final static int BORDER = 10;
 	private Font titleFont = null;
 	
-	//Images for corner buttons
+	// Images for corner buttons
 	private BufferedImage minimizeSheet;
 	private BufferedImage closeSheet;
 	private BufferedImage minimize;
 	private BufferedImage close;
 	
-	//Mouse location on title bar
+	// Mouse location on title bar
 	private Point mousePoint = null;
 	
 	private BufferedImage drawImage;
@@ -89,7 +94,7 @@ public class SleekFrame extends JFrame implements MouseListener, MouseMotionList
 		g.setFont( oldFont );
 		
 		// Draw components to main image
-		g.drawImage( cImg, BORDER, TITLE_HEIGHT, getWidth() - BORDER, getHeight() - BORDER,BORDER, TITLE_HEIGHT, getWidth() - BORDER, getHeight() - BORDER, null);
+		g.drawImage( cImg, BORDER, TITLE_HEIGHT, getWidth() - BORDER, getHeight() - BORDER, BORDER, TITLE_HEIGHT, getWidth() - BORDER, getHeight() - BORDER, null );
 		
 		// Draw separator between title bar and window
 		Graphics2D g2d = (Graphics2D) g;
@@ -112,15 +117,15 @@ public class SleekFrame extends JFrame implements MouseListener, MouseMotionList
 	public void mouseMoved( MouseEvent e ) {
 		// Minimize
 		if ( new Rectangle( getWidth() - ( TITLE_HEIGHT * 2 ), 0, TITLE_HEIGHT, TITLE_HEIGHT ).contains( e.getPoint() ) ) {
-			minimize = minimizeSheet.getSubimage( TITLE_HEIGHT, 0, TITLE_HEIGHT, TITLE_HEIGHT ); //Hovering
+			minimize = minimizeSheet.getSubimage( TITLE_HEIGHT, 0, TITLE_HEIGHT, TITLE_HEIGHT ); // Hovering
 		} else {
-			minimize = minimizeSheet.getSubimage( 0, 0, TITLE_HEIGHT, TITLE_HEIGHT ); //Default
+			minimize = minimizeSheet.getSubimage( 0, 0, TITLE_HEIGHT, TITLE_HEIGHT ); // Default
 		}
 		// Close
 		if ( new Rectangle( getWidth() - TITLE_HEIGHT, 0, TITLE_HEIGHT, TITLE_HEIGHT ).contains( e.getPoint() ) ) {
-			close = closeSheet.getSubimage( TITLE_HEIGHT, 0, TITLE_HEIGHT, TITLE_HEIGHT ); //Hovering
+			close = closeSheet.getSubimage( TITLE_HEIGHT, 0, TITLE_HEIGHT, TITLE_HEIGHT ); // Hovering
 		} else {
-			close = closeSheet.getSubimage( 0, 0, TITLE_HEIGHT, TITLE_HEIGHT ); //Default
+			close = closeSheet.getSubimage( 0, 0, TITLE_HEIGHT, TITLE_HEIGHT ); // Default
 		}
 	}
 	

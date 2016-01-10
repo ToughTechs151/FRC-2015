@@ -2,7 +2,15 @@ package org.nashua.tt151.device;
 
 import java.awt.Color;
 
+/**
+ * A relay to be displayed on the DeviceModule
+ * 
+ * @author Kareem El-Faramawi
+ */
 public class RelayDevice extends Device {
+	/**
+	 * Different directional modes of a relay
+	 */
 	public enum Direction {
 		BACKWARD( '-' ),
 		FORWARD( '+' ),
@@ -24,14 +32,17 @@ public class RelayDevice extends Device {
 		}
 	}
 	
+	/**
+	 * Different values of a relay
+	 */
 	public enum Value {
 		REV( '-', Color.RED ),
 		FWD( '+', Color.GREEN ),
 		OFF( '0', Color.YELLOW ),
-		ON('1', Color.BLUE);
+		ON( '1', Color.BLUE );
 		
 		private char sh;
-		private Color c;
+		private Color c; // Color for each value
 		
 		public static Value getFromShorthand( char sh ) {
 			for ( Value v : Value.values() ) {
@@ -48,9 +59,18 @@ public class RelayDevice extends Device {
 		}
 	}
 	
+	// Direction and value
 	private Direction direction;
 	private Value value;
 	
+	/**
+	 * Create a relay
+	 * 
+	 * @param channel Device channel
+	 * @param name Name of the device
+	 * @param direction The direction of the relay
+	 * @param value The value of the relay
+	 */
 	public RelayDevice( int channel, String name, Direction direction, Value value ) {
 		super( channel, name );
 		this.direction = direction;

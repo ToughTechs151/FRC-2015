@@ -16,8 +16,6 @@ public class F310 extends Controller {
 	
 	/**
 	 * Constants for all button mappings
-	 * 
-	 * @author Kareem El-Faramawi
 	 */
 	public static final class Button {
 		public static final int X = 1;
@@ -36,8 +34,6 @@ public class F310 extends Controller {
 	
 	/**
 	 * Constants for all axis mappings
-	 * 
-	 * @author Kareem El-Faramawi
 	 */
 	public static final class Axis {
 		public static final int LEFT_X = 0;

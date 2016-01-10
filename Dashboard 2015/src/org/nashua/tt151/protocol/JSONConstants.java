@@ -1,5 +1,10 @@
 package org.nashua.tt151.protocol;
 
+/**
+ * A set of constants used as special labels when sending messages
+ * 
+ * @author Kareem El-Faramawi
+ */
 public class JSONConstants {
 	public static final String KEY_COMMAND = "C";
 	public static final String KEY_CONTENT = "CT";

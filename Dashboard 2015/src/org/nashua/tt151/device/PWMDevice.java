@@ -2,13 +2,20 @@ package org.nashua.tt151.device;
 
 import java.awt.Color;
 
-import org.nashua.tt151.util.MathUtils;
-
+/**
+ * A general analog device to be displayed on the DeviceModule
+ * 
+ * @author Kareem El-Faramawi
+ */
 public class PWMDevice extends Device {
+	// PWM state colors
 	protected static final Color NEUTRAL = Color.YELLOW;
 	protected static final Color FORWARD = Color.GREEN;
 	protected static final Color BACKWARD = Color.RED;
 	
+	/**
+	 * Different PWM device types
+	 */
 	public enum PWMType {
 		JAGUAR( 'J' ),
 		VICTOR( 'V' ),
@@ -32,9 +39,18 @@ public class PWMDevice extends Device {
 		}
 	}
 	
-	private PWMType type;
+	// Value and type
 	private double value;
+	private PWMType type;
 	
+	/**
+	 * Creates a PWMDevice
+	 * 
+	 * @param channel Device channel
+	 * @param name Name of the device
+	 * @param value Value of the device
+	 * @param type The type of device
+	 */
 	public PWMDevice( int channel, String name, double value, PWMType type ) {
 		super( channel, name );
 		this.value = value;
@@ -48,6 +64,8 @@ public class PWMDevice extends Device {
 	
 	@Override
 	protected Color selectStatusColor() {
+		// Yellow for neutral
+		// Red/Green for forward/backward
 		return type == PWMType.SERVO || value == 0 ? NEUTRAL : ( value > 0 ? FORWARD : BACKWARD );
 	}
 	

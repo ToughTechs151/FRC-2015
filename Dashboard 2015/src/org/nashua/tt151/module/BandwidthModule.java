@@ -19,6 +19,8 @@ import org.hyperic.sigar.SigarException;
  * Monitors bandwidth usage between dashboard and robot
  * 
  * @author Brian Ashworth
+ * 
+ * Yeah I'm not even gonna try to understand how this works. -Kareem
  */
 public class BandwidthModule extends JPanel {
 	private static final Sigar s = new Sigar();
